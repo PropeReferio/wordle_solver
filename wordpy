@@ -1,3 +1,5 @@
+#! python
+
 from itertools import product
 from argparse import ArgumentParser
 
