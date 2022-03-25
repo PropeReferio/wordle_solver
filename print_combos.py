@@ -14,10 +14,10 @@ def get_solutions(string, chars_remaining=None):
             cur_word = cur_word.replace('_', char_set[i], 1)
         solutions.append(cur_word)
 
-    return solutions
+    return set(solutions)
 
 
-def print_combos():
+def print_combos(guesses):
     parser = ArgumentParser()
     parser.add_argument(
         '-s',
@@ -38,8 +38,9 @@ def print_combos():
     remaining, string = parse_and_validate_options(parser)
 
     solutions = get_solutions(string, chars_remaining=remaining)
-    print(f"There are {len(solutions)} possible solutions:")
-    for solution in solutions:
+    valid_solutions = guesses & solutions
+    print(f"There are {len(valid_solutions)} possible solutions:")
+    for solution in valid_solutions:
         print(solution)
 
 
@@ -62,4 +63,6 @@ def parse_and_validate_options(parser):
 
 
 if __name__ == "__main__":
-    print_combos()
+    with open('./wordle-allowed-guesses.txt', 'r') as guesses:
+        guesses = {line.replace('\n', '') for line in guesses}
+    print_combos(guesses)
