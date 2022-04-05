@@ -5,19 +5,53 @@ from itertools import product
 from pathlib import Path
 
 
-def get_solutions(string, chars_remaining=None):
+def remove_non_yellow_solutions(solutions, yellow):
+    yellows_only = set()
+    for solution in solutions:
+        if len(set(solution) & set(yellow)) == len(yellow):
+            yellows_only.add(solution)
+
+    return yellows_only
+
+
+def get_solutions(string, chars_remaining=None, yellow=None):
     if chars_remaining is None:
         chars_remaining = 'abcdefghijklmnopqrstuvwxyz'
-    solutions = []
+    solutions = set()
     spaces_to_fill = len(list(filter(lambda x: x == '_', string)))
     filler_chars = product(chars_remaining, repeat=spaces_to_fill)
     for char_set in filler_chars:
         cur_word = string
         for i in range(spaces_to_fill):
             cur_word = cur_word.replace('_', char_set[i], 1)
-        solutions.append(cur_word)
+        solutions.add(cur_word)
+    if yellow is not None:
+        solutions = remove_non_yellow_solutions(solutions, yellow)
 
-    return set(solutions)
+    return solutions
+
+
+def parse_and_validate_options(parser):
+    args = parser.parse_args()
+    string = args.string
+    remaining = args.remaining
+    yellow = args.yellow
+    if len(string) != 5:
+        raise Exception(f"The string should be exactly 5 characters long.")
+    for char in string:
+        if not char.isalpha() and not char == '_':
+            raise Exception(f"The string passed for validation contains "
+                            f"invalid characters. It should only contain "
+                            f"letters and underscores.")
+    if remaining is not None:
+        for char in remaining:
+            if not char.isalpha():
+                raise Exception("The option --remaining should contain letters only.")
+    if yellow is not None:
+        for char in yellow:
+            if not char.isalpha():
+                raise Exception("The option --yellow should contain letters only.")
+    return yellow, remaining, string
 
 
 def print_combos():
@@ -38,34 +72,25 @@ def print_combos():
         help='a string containing letters only, which may fill the empty, '
              'unknown spaces'
     )
-    remaining, string = parse_and_validate_options(parser)
+    parser.add_argument(
+        '-y',
+        '--yellow',
+        type=str,
+        required=False,
+        help='a string containing letters only, which represent yellow letters '
+             'in the wrong position. This will filter out solutions that lack '
+             'yellow letters.'
+    )
+    yellow, remaining, string = parse_and_validate_options(parser)
     guess_path = Path(__file__).parent.absolute().joinpath('wordle-allowed-guesses.txt')
     with open(guess_path, 'r') as guesses:
         guesses = {line.replace('\n', '') for line in guesses}
 
-    solutions = get_solutions(string, chars_remaining=remaining)
+    solutions = get_solutions(string, chars_remaining=remaining, yellow=yellow)
     valid_solutions = guesses & solutions
     print(f"There are {len(valid_solutions)} possible solutions:")
     for solution in valid_solutions:
         print(solution)
-
-
-def parse_and_validate_options(parser):
-    args = parser.parse_args()
-    string = args.string
-    remaining = args.remaining
-    if len(string) != 5:
-        raise Exception(f"The string should be exactly 5 characters long.")
-    for char in string:
-        if not char.isalpha() and not char == '_':
-            raise Exception(f"The string passed for validation contains "
-                            f"invalid characters. It should only contain "
-                            f"letters and underscores.")
-    if remaining is not None:
-        for char in remaining:
-            if not char.isalpha():
-                raise Exception("The option --remaining should contain letters only.")
-    return remaining, string
 
 
 if __name__ == "__main__":
