@@ -11,6 +11,10 @@ def remove_non_yellow_solutions(solutions, yellow):
         if len(set(solution) & set(yellow)) == len(yellow):
             yellows_only.add(solution)
 
+    # TODO this should be improved so that the code understands
+    # where yellow letters cannot be, and so that yellow letters
+    # are included in remaining letters, requiring typing only once.
+
     return yellows_only
 
 
@@ -95,3 +99,11 @@ def print_combos():
 
 if __name__ == "__main__":
     print_combos()
+
+# TODO it would be cool to print out something like this... all
+# possible yellow positions with blanks:
+
+# re_t_
+# re__t
+# _ert_
+# _er_t
