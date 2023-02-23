@@ -15,6 +15,9 @@ def remove_non_yellow_solutions(solutions, yellow):
     # where yellow letters cannot be, and so that yellow letters
     # are included in remaining letters, requiring typing only once.
 
+    # input could be like this: wordpy -s _a__e -y u35
+    # To say that u is in the word, but not in space 3 or 5
+
     return yellows_only
 
 
