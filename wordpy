@@ -51,6 +51,10 @@ def get_solutions(
 
 
 def parse_and_validate_options(parser: ArgumentParser):
+    # TODO Docstring. This should not just validate, but return custom
+    #  type which retain information learned by parsing.
+
+    # TODO the yellow chars should be added to remaining.
     args = parser.parse_args()
     string = args.string
     remaining = args.remaining
@@ -129,6 +133,8 @@ def print_combos():
 
 if __name__ == "__main__":
     print_combos()
+    # TODO write out what's actually happening here, step by step, to find bottlenecks
+    #  and to optimize the order things happen.
 
 # TODO it would be cool to print out something like this... all
 # possible yellow positions with blanks:
