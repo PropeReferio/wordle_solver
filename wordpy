@@ -58,6 +58,7 @@ def parse_and_validate_options(parser: ArgumentParser):
     args = parser.parse_args()
     string = args.string
     remaining = args.remaining
+    only_possibilities = args.only_possibilities
     yellow = args.yellow
     if len(string) != 5:
         raise Exception(f"The string should be exactly 5 characters long.")
@@ -88,7 +89,7 @@ def parse_and_validate_options(parser: ArgumentParser):
                                         "less than 6. The middle or last characters "
                                         "in one of the values isn't a digit less than "
                                         "6.")
-    return yellow, remaining, string
+    return yellow, remaining, string, only_possibilities
 
 
 def print_combos():
@@ -119,16 +120,27 @@ def print_combos():
              'yellow letters, or with those letters in the wrong position(s). '
              'Example: y35,d2,e4'
     )
-    yellow, remaining, string = parse_and_validate_options(parser)
+    parser.add_argument(
+        '-o',
+        '--only-possibilities',
+        action='store_true',
+        help='If this flag is used, the script will print all possiblities, including '
+             'nonsense strings, for example, az'
+    )
+    yellow, remaining, string, only_possibilities = parse_and_validate_options(parser)
     guess_path = Path(__file__).parent.absolute().joinpath('wordle-allowed-guesses.txt')
     with open(guess_path, 'r') as official_possibilities:
         official_possibilities = {line.replace('\n', '') for line in official_possibilities}
 
     calculated_solutions = get_solutions(string, chars_remaining=remaining, yellow=yellow)
-    valid_solutions = official_possibilities & calculated_solutions
-    print(f"There are {len(valid_solutions)} possible solutions:")
-    for solution in valid_solutions:
-        print(solution)
+    if only_possibilities:
+        for solution in calculated_solutions:
+            print(solution)
+    else:
+        valid_solutions = official_possibilities & calculated_solutions
+        print(f"There are {len(valid_solutions)} possible solutions:")
+        for solution in valid_solutions:
+            print(solution)
 
 
 if __name__ == "__main__":
